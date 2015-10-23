@@ -86,6 +86,90 @@ def set_timestep():
     # compute delta_t
     deltat = cfl * dmin/(astag + umax)
 
+"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+set_fluxes()
+
+Quantities to compute:
+~~~~~~~~~~~~~~~~~~~~~~~
+fluxi_mass(i,j) |  fluxj_mass(i,j)
+fluxi_xmom(i,j) |  fluxj_xmom(i,j)
+fluxi_ymom(i,j) |  fluxj_ymom(i,j)
+fluxi_enth(i,j) |  fluxj_enth(i,j)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
 def set_fluxes():
 
+    #--------------------------------------------------------------------------
+    # Calculate the mass fluxes
+    #--------------------------------------------------------------------------
     # Mass flux across each "i" face of elements.
+    # Also compute total mass flow rate across each "i" line
+    for i in range(0, ni):
+        flow(i) = 0.0
+        for j in range(0, nj - 1):
+            global fluxi_mass(i,j) = 0.5 *( (rovx(i,j) + rovx(i, j+1) ) * dlix(i,j) +
+                             (rovy(i,j) + rovy(i, j+1) )* dliy(i,j) )
+            flow(i) = flow(i) + fluxi_mass(i,j)
+
+    # Now the mass flux across each "j" face
+    for i in range(0, ni - 1):
+        for j in range(1, nj):
+            global fluxj_mass(i,j) = 0.5 *( (rovx(i,j) + rovx(i + 1, j)) * dljx(i,j) +
+                            (rovy(i,j) + rovy(i + 1, j)) * dljy(i,j) )
+
+
+    # Set the mass fluxes through each j={1,...,nj} to be 0 as these are solid
+    # surfaces. Not necessary to resolve the velocity parallel to these surfaces
+    for i in range(0, ni - 1):
+        global fluxj_mass(i,1) = 0.0
+        global fluxj_mass(i,nj) = 0.0
+
+    #--------------------------------------------------------------------------
+    # Calculate the fluxes of X-momentum
+    #--------------------------------------------------------------------------
+    # in the "i" direction
+    for i in range(0, ni):
+        for j in range(0,nj-1):
+            global fluxi_xmom(i,j) = 0.5 * ( fluxi_mass(i,j)*(vx(i,j) + vx(i, j+1) ) +
+                              (p(i,j) + p(i, j + 1)) * dlix(i,j) )
+    # in the "j" direction
+    for i in range(0, ni - 1):
+        for j in range(0, nj):
+            global fluxj_xmom(i,j) = 0.5 * ( fluxj_mass(i,j)*(vx(i,j) + vx(i + 1, j)) +
+                             (p(i,j) + p(i+1,j))*dljx(i,j) )
+
+    #--------------------------------------------------------------------------
+    # Calculate the fluxes of Y-momentum
+    #--------------------------------------------------------------------------
+    # in the "i" direction
+    for i in range(0, ni):
+        for j in range(0, nj - 1):
+            fluxi_ymom(i,j) = 0.5 * ( fluxi_mass(i,j) * (vy(i,j) + vy(i, j+1)) +
+                                (p(i,j) + p(i,j+1))*dliy(i,j) )
+
+    # in the "j" direction
+    for i in range(0, ni - 1):
+        for j in range(0, nj):
+            fluxj_ymom(i,j) = 0.5 * (fluxj_mass(i,j) * (vy(i,j) + vy(i+1,j)) +
+                                (p(i,j) + p(i+1, j)) * dljy(i,j))
+
+    #--------------------------------------------------------------------------
+    # Calculate the fluxes of enthalpy
+    #--------------------------------------------------------------------------
+    # in the "i" direction
+    for i in range(0, ni):
+        for j in range(0, nj - 1):
+            fluxi_enth(i,j) = 0.5 * (fluxi_mass(i,j) + (hstag(i,j) + hstag(i,j+1)))
+
+    # in the "j" direction
+    for i in range(0, ni - 1):
+        for j in range(0, nj):
+            fluxj_enth(i,j) = 0.5 * (fluxj_mass(i,j) + (hstage(i,j) + hstag(i+1, j)))
+
+"""
+subroutine sums the fluxes for each element, calculates the changes in these
+variable "prop" and distributes them to the four corners of the element
+"""
+def sum_fluxes(iflux, jflux, prop, delprop):
