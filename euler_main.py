@@ -173,3 +173,90 @@ subroutine sums the fluxes for each element, calculates the changes in these
 variable "prop" and distributes them to the four corners of the element
 """
 def sum_fluxes(iflux, jflux, prop, delprop):
+
+    # Find the change in the variable "prop" in each cell over the time
+    # step "delta_t" and save it in store
+    for i in range(1, ni - 1):
+        for j in range(1, nj - 1):
+            totflux = (iflux(i,j) - iflux(i+1, j) + jflux(i,j) - jflux(i,j+1))
+            store(i,j) = deltat * totflux/area(i,j)
+
+    # Distribute the changes equally to the four corners of each cell. Each
+    # interior grid points receive one quarter of the change from each of the four
+    # cells adjacent to it.
+    for i in range(0, ni - 1):
+        for j in range(0, nj - 1):
+            add = (store(i,j) + store(i-1, j-1) + store(i,j-1) + store(i-1,j)) * 0.25
+            prop(i,j) = prop(i,j) + add
+
+    # Now add the changes to the upper and lower boundaries. These receive half
+    # the change from each of the two cells adjacent to them.
+    for i in range(1,ni-1):
+        # add for the nodes with j = 1
+        add = (store(i,0) + store(i-1,0)) * 0.5
+        prop(i,0) = prop(i,0) + add
+
+        # add for the nodes with j = nj
+        add = (store(i,nj-1) + store(i-1,nj-1)) * 0.5
+        prop(i,j) = prop(i,nj) + add
+
+    # Now add the changes on to the four corner points. These receive the full
+    # change from the single cell of which they form one corner.
+    # for  i = 0, j = 0
+    add = store(0,0)
+    prop(0,0) = prop(0,0) + add
+    # for i = 0, j = nj
+    add = store(0,nj - 1)
+    prop(0,nj) = prop(0,nj) + add
+    # for i = ni, j = 0
+    add = store(ni - 1, 0)
+    prop(ni, 0) = prop(ni, 0) + add
+    # for i=ni, j=nj
+    add = store(ni - 1, nj - 1)
+    prop(ni,nj) = prop(ni,nj) + add
+
+    # Now save these changes in the primary variables as delprop
+    for i in range(0,ni - 1):
+        for j in range(0, nj - 1):
+            delprop(i,j) = store(i,j)
+
+"""
+This subroutine smooths the variable "prop" (i.e. it adds the artificial viscosity
+) by taking (1-SF) * the calculated value of "prop" + SF x (the average of the surrounding
+values of "prop"). Here SF is the smoothing factor
+"""
+def smooth(prop):
+
+    # how do we include the common block here!?
+    sf = smooth_fac
+    sf_1 = 1.0 - sf
+
+    for u in range(0, ni):
+        ip1 = i + 1
+        if(i == ni):
+            ip1 = ni
+        im1 = i - 1
+        if(i == 1)
+            im1 = 1
+        for j in range(1, nj - 1):
+            average = 0.25 * (prop(ip1,j) + prop(im1,j) + prop(i,j-1) + prop(i,j+1))
+            store(i,j) = sfm1 * prop(i,j) + sf * average
+
+
+        # On the surfaces j=1 and j=nj take the average as shown below:
+        avg1 = (prop(im1,0) + prop(ip1, 0) + 2.0 * prop(i,1) - prop(i,2))/3.0
+        avgnj = (prop(im1, nj) + prop(ip1, nj) + 2.0 * prop(i, nj - 1) - prop(i,nj-2))/3.0
+
+        # add code to store the smooth surface values
+        store(i,0) = sfm1 * prop(i,0) + sf * avg1
+        store(i,nj) = sfm1 * prop(i,nj)+ sf * avgnj
+
+    # Reset the smoothed value to propr before returning
+    for i in range(0,ni):
+        for j in range(0,nj):
+            prop(i,j) = store(i,j)
+
+
+def apply_boundary_conditions():
+
+    
