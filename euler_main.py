@@ -257,6 +257,17 @@ def smooth(prop):
             prop(i,j) = store(i,j)
 
 
+"""
+This routine applies the boundary conditions that P = Pdown at i = ni. At the
+inlet boundary the change in density is relaxed to obtain roinlet(j) which is then
+used to obtain other properties at the inlet assuming isentropic flow from
+stagnation conditions, "po and to" together with the specified inlet flow angle
+alpha1. Because the inlet condition may become unstable, it is safer to relax
+the changes in inlet density by a factor "rfin = 0.25" as set below. Reduce this
+further if the inlet becomes unstable. Also worth checking roinlet.
+"""
 def apply_boundary_conditions():
 
-    
+    rfin = 0.25
+    rfin1 = 1.0 - rfin
+    rostagin = pstagin / 
