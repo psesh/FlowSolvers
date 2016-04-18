@@ -17,51 +17,6 @@ Features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-def main():
-
-    # Read in the geometry and flow conditions
-    read_data()
-
-    # Generate the grid coordinates, element areas and projected lengths of the
-    # sides of the elements
-    generate_grid()
-
-    # Check that the areas and the projected lengths are correct
-    check_grid()
-
-    # Initial solution
-    flow_guess()
-
-    # Set the length of the timestep. Initially this is a constant time step
-    # based on a conservative guess of the Mach number
-    set_timestep()
-
-    # time stepping for the
-    while True:
-
-        set_other_flow_properties()
-
-        apply_boundary_conditions()
-
-        set_fluxes()
-
-        # Sum the fluxes
-        sum_fluxes(fluxi_mass, fluxj_mass, ro, delro)
-        sum_fluxes(fluxi_enth, fluxj_enth, roe, delroe)
-        sum_fluxes(fluxi_xmom, fluxj_xmom, rovx, delrovx)
-        sum_fluxes(fluxi_ymom, fluxj_ymom, rovy, delrovy)
-
-        # smoothing
-        smooth(ro)
-        smooth(rovx)
-        smooth(rovy)
-        smooth(roe)
-
-        # convergence check here
-
-        if fail_condition:
-            break
-
 
 " Compute secondary flow variables from the primary ones at each grid point"
 " primary variables: ro, rovx, rovy, roe"
