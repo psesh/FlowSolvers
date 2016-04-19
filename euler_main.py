@@ -13,7 +13,7 @@ Features
 - time derivatives obtained by central differencing
 - solution stabilized by artifical viscosity
 
----> need a way to incorporate "common block euler"
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
@@ -94,5 +94,3 @@ This subroutine smooths the variable "prop" (i.e. it adds the artificial viscosi
 ) by taking (1-SF) * the calculated value of "prop" + SF x (the average of the surrounding
 values of "prop"). Here SF is the smoothing factor
 """
-
-
