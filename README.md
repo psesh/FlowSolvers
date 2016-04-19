@@ -8,3 +8,5 @@ Currently, the code has the following characteristics:
    - Lax-Friedrichs method
    - Time derivatives via central differencing
    - Stable solution via artificial viscosity
+
+Pranay Seshadri
