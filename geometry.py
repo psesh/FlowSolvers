@@ -16,10 +16,36 @@ import random as rnd
 def main():
 
     # Parameters for the grid
-    nu, nv, nw = 100, 51, 1
+    nu, nv, nw = 160, 61, 1
     create_grid(nu, nv, nw)
 
 
+# Compute the areas of grid -- we do this via the cross product formula!
+def compute_areas(x, y):
+
+    # We think of each cell as a quadrilateral. Our objective is to compute
+    # its area by taking the cross product of AC with BD. We begin by defining
+    # the vectors AC and BD for each cell and then computing its area!
+    nu, nv, nw = x.shape
+
+    areas = np.zeros((nv, nu))
+    for j in range(0, nv - 1):
+        for i in range(0, nu - 1):
+            A = np.array((x[j,i,0] ,  y[j,i,0] ))
+            B = np.array(( x[j,i+1,0], y[j,i,0] ))
+            C = np.array(( x[j+1,i+1,0], y[j+1,i+1,0]) )
+            D = np.array(( x[j+1,i,0], y[j+1,i,0] ) )
+            print(C)
+            print(C[0])
+            AC = np.array((C[0] - A[0], C[1] - A[1], 0 ))
+            BD = np.array((D[0] - B[0], D[1] - B[1], 0 ))
+            print(AC, BD)
+            print(np.cross(AC, BD))
+            areas[j,i] = 1/2 * np.cross(AC, BD)
+
+    print areas
+
+# Create a grid!
 def create_grid(nu, nv, nw):
 
     real_width = 10.0
@@ -96,5 +122,7 @@ def create_grid(nu, nv, nw):
     # Converting from points to VTK readable format!
     gridToVTK("./structured", point_x, point_y, point_z)
 
+    # Compute the areas!
+    compute_areas(point_x, point_y)
 
 main()
