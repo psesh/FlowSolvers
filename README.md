@@ -10,6 +10,6 @@ Currently, the code has the following characteristics:
    - Stable solution via artificial viscosity
    - 2D structured grid generation
 
-Pranay Seshadri
-University of Cambridge
+Pranay Seshadri <br>
+University of Cambridge <br>
 ps583 <at> cam.ac.uk
