@@ -1,0 +1,11 @@
+# Boundary Conditions File
+rgas = 287.5
+gamma = 1.4
+pressure_stag_inlet =  
+temp_stag_inlet
+alpha_1
+pressure_static_exit
+cfl
+smooth_fac
+nsteps = 
+conlim = 

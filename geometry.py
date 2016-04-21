@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from evtk.hl import gridToVTK, pointsToVTK
+#from evtk.hl import gridToVTK, pointsToVTK
 import numpy as np
 import random as rnd
 
@@ -13,20 +13,13 @@ import random as rnd
     ps583@cam.ac.uk
 
 """
-def main():
-
-    # Parameters for the grid
-    nu, nv, nw = 160, 61, 1
-    create_grid(nu, nv, nw)
-
-
 # Compute the areas of grid -- we do this via the cross product formula!
 def compute_areas(x, y):
 
     # We think of each cell as a quadrilateral. Our objective is to compute
     # its area by taking the cross product of AC with BD. We begin by defining
     # the vectors AC and BD for each cell and then computing its area!
-    nu, nv, nw = x.shape
+    nv, nu, nw = x.shape
 
     areas = np.zeros((nv, nu))
     for j in range(0, nv - 1):
@@ -35,15 +28,11 @@ def compute_areas(x, y):
             B = np.array(( x[j,i+1,0], y[j,i,0] ))
             C = np.array(( x[j+1,i+1,0], y[j+1,i+1,0]) )
             D = np.array(( x[j+1,i,0], y[j+1,i,0] ) )
-            print(C)
-            print(C[0])
             AC = np.array((C[0] - A[0], C[1] - A[1], 0 ))
             BD = np.array((D[0] - B[0], D[1] - B[1], 0 ))
-            print(AC, BD)
-            print(np.cross(AC, BD))
-            areas[j,i] = 1/2 * np.cross(AC, BD)
-
-    print areas
+            areas[j,i] = 1/2 * np.linalg.norm(np.cross(AC, BD))
+    
+    return areas
 
 # Create a grid!
 def create_grid(nu, nv, nw):
@@ -115,14 +104,11 @@ def create_grid(nu, nv, nw):
                 second_partc = -(1.0 - sj) * (1 - si) * point_z[0,0,0] - sj * (1 - si) * point_z[nv-1,0,0] - sj * si * point_z[nv -1, nu - 1, 0] - (1 - sj) * si * point_z[0,nu - 1,0]
                 point_z[j,i,k] = first_partc + second_partc
 
-    # Dummy values for the pressure & temp
-    pressure = np.random.rand(ncells).reshape((nv-1, nu-1, nw-1))
-    temp = np.random.rand(npoints).reshape((nv, nu, nw))
 
     # Converting from points to VTK readable format!
-    gridToVTK("./structured", point_x, point_y, point_z)
+    #gridToVTK("./structured", point_x, point_y, point_z)
 
     # Compute the areas!
-    compute_areas(point_x, point_y)
+    areas = compute_areas(point_x, point_y)
 
-main()
+    return point_x, point_y, point_z, areas
