@@ -6,7 +6,66 @@ import numpy as np
 # Generate an initial flow solution based off the flow conditions and the geometry
 def initial_guess():
     
-    nu, nv, nw = 120, 60, 1 
+    # Geometry parameters:
+    nu, nv, nw = 120, 60, 1
+    
+    
+    #--------------------------------------------------------------
+    #
+    # Read in the boundary conditions file and save variables
+    #
+    #--------------------------------------------------------------
+    
+    # Read in boundary condition file!
+    bcfile = open('boundary_conditions.txt', 'r')
+    input_data = bcfile.readlines()
+    bcfile.close()
+    
+    # Skip the header and proceed with the initialization!
+    line_2 = input_data[1].split()
+    rgas = np.float(line_2[2])
+    
+    line_3 = input_data[2].split()
+    gamma = np.float(line_3[2])
+
+    line_4 = input_data[3].split()
+    pressure_stag_inlet = np.float(line_4[2])
+
+    line_5 = input_data[4].split()
+    temp_stag_inlet = np.float(line_5[2])
+
+    line_6 = input_data[5].split()
+    alpha_1 = np.float(line_6[2])
+
+    line_7 = input_data[6].split()
+    pressure_static_exit = np.float(line_7[2])
+    
+    line_8 = input_data[7].split()
+    cfl = np.float(line_8[2])
+    
+    line_9 = input_data[8].split()
+    smooth_fac_input = np.float(line_9[2])
+    
+    line_10 = input_data[9].split()
+    nsteps = np.float(line_10[2])
+    
+    line_11 = input_data[10].split()
+    conlim_in = np.float(line_11[2])
+
+    #----------------------------------------------
+    #
+    # Setup other variables!
+    #
+    #----------------------------------------------
+    emax = 1000000
+    eavg = emax
+    cp = rgas * gamma / (gamma - 1.0)
+    cv = cp / (gamma * 1.0)
+    gamma_factor = (gamma - 1.0) / (gamma * 1.0)
+    smooth_fac = smooth_fac_input * cfl
+    conlim = conlim_in * cfl
+    alpha_1 = alpha_1 * np.pi/(180.0)
+    
     #----------------------------------------------
     #
     # Here we initialize the flow variables!
@@ -19,10 +78,7 @@ def initial_guess():
     enthalpy_stagnation = np.zeros((nv, nu, nw)) # stagnation enthalpy
     ro_energy = np.zeros((nv, nu, nw)) # Density * energy
     
-    # Fluid / gas constants
-    gamma = 1.4 # gas specific heat ratio
-    rgas  = 287.5 # gas constant J/kg K
-    
+
     # Dual-for loops for initialization!
     for k in range(0, nw):
         for j in range(0, nv):
@@ -30,14 +86,20 @@ def initial_guess():
                 ro[j,i,k] = 1.2
                 ro_vx[j,i,k] = 100.0 * j/(nv * 1.0)
                 ro_vy[j,i,k] = 0.0
-                pressure[j,i,k] = 100000 * (0.9 + 0.1 * j/(nv * 1.0))
+                pressure[j,i,k] = 100000 * (0.9 + 0.1 * i/(nu * 1.0))
                 enthalpy_stagnation[j,i,k] = 300000.0
                 ro_energy[j,i,k] = pressure[j,i,k] / (gamma - 1.0)
     
     # Calculate the reference values for checking convergence
     ncells = nv * nu * nw
-    jmid = (1 + nv) / (2.0)
-    #ro_in = pressure_stagnation / rgas / 
+    jmid = (1 + nu) / (2.0)
+    ro_in = pressure_stag_inlet / rgas / temp_stag_inlet
+    ref_ro = (pressure_stag_inlet - pressure_static_exit) / rgas / temp_stag_inlet
+    ref_temp = temp_stag_inlet * (pressure_static_exit / pressure_stag_inlet) ** gamma_factor
+    ref_velocity = np.sqrt(2 * cp * (temp_stag_inlet - ref_temp))
+    ref_ro_vx = ro_in * ref_velocity
+    ref_ro_vy = ref_ro_vx
+    ref_ro_energy = ro_in * cv * (temp_stag_inlet - ref_temp)
     
     #pressure = np.random.rand(ncells).reshape((nv-1, nu-1, nw-1))
     #temp = np.random.rand(npoints).reshape((nv, nu, nw))
@@ -45,5 +107,8 @@ def initial_guess():
     # Converting from points to VTK readable format!
     point_x, point_y, point_z, areas = create_grid(nu, nv, nw)
     gridToVTK("./structured", point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro })
+
+# More appropriate estimate of flow conditions!
+def refined_flow_estimate()
 
 initial_guess()
