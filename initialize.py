@@ -105,10 +105,25 @@ def initial_guess():
     #temp = np.random.rand(npoints).reshape((nv, nu, nw))
 
     # Converting from points to VTK readable format!
-    point_x, point_y, point_z, areas = create_grid(nu, nv, nw)
+    point_x, point_y, point_z, xlow, ylow, xhigh, yhigh, areas = create_grid(nu, nv, nw)
     gridToVTK("./structured", point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro })
 
 # More appropriate estimate of flow conditions!
 def refined_flow_estimate()
 
+    # Subroutine where we make an initial guess of the primary flow variables:
+    # ro, ro_vx, ro_vy, ro_energy
+    # The guess does not need to be very accuracy, but the better it is the 
+    # faster the program will converge. Values to the primary flow variables
+    # will be given at each grid point in this subroutine
+
+    aflow = np.zeros((nu, 1))    
+    # Work out the length of each "i" line between grid points, "i, 1" and "i, nj"
+    # and call it AFLOW[I]
+    for i in range(0, nu):
+        aflow[i,0] = np.sqrt( (xhigh[i,0] - xlow[i,0])**2 + (yhigh[i,0] - ylow[i,0])**2 )
+        
+    # Make an initial guess of the density and the velocity at the exit by assuming 
+    # isentropic flow
+        
 initial_guess()

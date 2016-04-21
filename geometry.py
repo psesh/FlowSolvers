@@ -47,11 +47,17 @@ def create_grid(nu, nv, nw):
     ncells = (nv - 1) * (nu - 1) * (nw - 1)
     npoints = nv * nu * nw
 
+    # Storing data for each point in the grid!
     point_x = np.zeros((nv , nu , nw ))
     point_y = np.zeros((nv , nu , nw ))
     point_z = np.zeros((nv , nu , nw ))
-
-
+    
+    # Storing upper and lower boundary values only!
+    xlow = np.zeros((nu, 1))
+    ylow = np.zeros((nu, 1))
+    xhigh = np.zeros((nu, 1))
+    yhigh = np.zeros((nu, 1))
+    
     # Inlet
     for i in range(0, nv):
         point_x[i,0,0] = 0.0
@@ -75,13 +81,18 @@ def create_grid(nu, nv, nw):
         point_x[0,i,0] = x1 - r*np.cos(theta1 + (theta2 - theta1)/(nu-1)*i)
         point_y[0,i,0] = -(y1 - r*np.sin(theta1 + (theta2 - theta1)/(nu-1)*i)) # --- why??
         point_z[0,i,0] = 0
-
+        xlow[i,0] = point_x[0,i,0]
+        ylow[i,0] = point_y[0,i,0]
+        
+        
     # Top defn'
     for i in range(0, nu):
         point_x[nv-1,i,0] = x1 - r*np.cos(theta1 + (theta2 - theta1)/(nu - 1) * i )
         point_y[nv-1,i,0] = 2.0 + y1 - r*np.sin(theta1 + (theta2 - theta1)/(nu-1)* i)
         point_z[nv-1,i,0] = 0
-
+        xhigh[i,0] = point_x[nv-1,i,0]
+        yhigh[i,0] = point_y[nv-1,i,0]
+        
     # For loop to implement Coon's patch! (thanks Caleb!)
     for k in range(0, nw):
         for j in range(0, nv):
@@ -111,4 +122,4 @@ def create_grid(nu, nv, nw):
     # Compute the areas!
     areas = compute_areas(point_x, point_y)
 
-    return point_x, point_y, point_z, areas
+    return point_x, point_y, point_z, xlow, ylow, xhigh, yhigh, areas
