@@ -109,7 +109,7 @@ def initial_guess():
     gridToVTK("./structured", point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro })
 
 # More appropriate estimate of flow conditions!
-def refined_flow_estimate()
+def refined_flow_estimate():
 
     # Subroutine where we make an initial guess of the primary flow variables:
     # ro, ro_vx, ro_vy, ro_energy
@@ -117,13 +117,67 @@ def refined_flow_estimate()
     # faster the program will converge. Values to the primary flow variables
     # will be given at each grid point in this subroutine
 
-    aflow = np.zeros((nu, 1))    
+    # Allocate memory
+    aflow = np.zeros((nu, 1)) # length of each "i" between points
+    ro_guess = np.zeros((nu, 1))
+    vel_guess = np.zeros((nu, 1))
+    
+    # Set maximum values
+    mach_limit = 1.0
+    temp_limit = temp_stag_inlet / (1.0 + 0.5 * (gamma - 1.0) * mach_limit * mach_limit)
+    
     # Work out the length of each "i" line between grid points, "i, 1" and "i, nj"
     # and call it AFLOW[I]
     for i in range(0, nu):
         aflow[i,0] = np.sqrt( (xhigh[i,0] - xlow[i,0])**2 + (yhigh[i,0] - ylow[i,0])**2 )
         
     # Make an initial guess of the density and the velocity at the exit by assuming 
-    # isentropic flow
+    # isentropic flow conditions. 
+    ro_stag_in = pressure_stag_inlet / (rgas * temp_stag_inlet)
+    ro_exit = ro_stag_in * (pressure_static_exit / pressure_stag_inlet) ** (1.0/gamma)
+    temp_static_exit = pressure_static_exit / (rgas * ro_exit)
+    vel_exit = np.sqrt(2 * cp * (temp_stag_inlet - temp_static_exit))
+    mflow = ro_exit * aflow[nu,0] * vel_exit
+    
+    # Now estimate the velocity and density at every "i" line. Call the velocity
+    # V_guess[i] and the density ro_guess[i]. First assume that the density is constant
+    # and that the flow is perpendicular to the "i"=constant lines and hence occupies
+    # the area aflow[i].
+    # Hence use continuity to estimate the flow velocity v_guess[i]
+    # Use this velocity to calculate the static temperature assuming that the 
+    # stagnation temperature is constant
+    # Check that this temperature is not less than TLIM and set = TLIM if it is
+    # Next use this temperature and isentropic flow to obtain a better estimate
+    # of this density, ro_guess[i]
+    # Use this density and continuity to obtain a better estimate of the velocity
+    # and set = V_guess[i]
+    
+    for i in range(0, nu-1):
+        ro_guess[i,0] = ro_exit
+        vel_guess[i,0] = mflow / (ro_guess[i,0] * aflow[i,0])
+        temp_static = temp_stag_inlet - 0.5 *  (vel_guess[i,0]**2)/(cp)
+        
+        # Check if temp_static is within limits
+        if temp_static < temp_limit:
+            temp_static = temp_limit
+        
+        ro_guess[i,0] = 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+        
         
 initial_guess()
