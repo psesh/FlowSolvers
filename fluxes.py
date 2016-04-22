@@ -1,4 +1,6 @@
 #!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
+import numpy as np
+
 """
 
 Class for setting the fluxes. 
@@ -30,10 +32,8 @@ def set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditio
     flow = fluxes[8]
     
     # "Unpack" the primary flow variables
-    ro = primary_variables[0]
     ro_vel_x = primary_variables[1] 
     ro_vel_y = primary_variables[2]  
-    ro_energy = primary_variables[3] 
     
     # "Unpack" the secondary flow variables
     vel_x = secondary_variables[0]
@@ -43,8 +43,6 @@ def set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditio
     
     # "Unpack" the grid parameters
     point_x = grid_parameters[0] 
-    point_y = grid_parameters[1] 
-    point_z = grid_parameters[2] 
     dlix = grid_parameters[8]
     dliy = grid_parameters[9]
     dljx = grid_parameters[10]
@@ -115,70 +113,80 @@ def set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditio
     fluxes[8] = flow
     
     return fluxes
+    
 """
 subroutine sums the fluxes for each element, calculates the changes in these
 variable "prop" and distributes them to the four corners of the element
 """
-def sum_fluxes(iflux, jflux, prop, delprop, frkut):
+def sum_fluxes(iflux, jflux, prop, prop_start, delprop, frkut, step, areas):
     
     #---------------------------------------------------------
     # FORMAT
     #
     # iflux, jflux = np.zeros((nv, nu))
     # prop = np.zeros((nv, nu, nw ))
-    # 
+    # NOTE: step comes from "time-stepping"
     #---------------------------------------------------------
     
     # Allocate "local" memory
+    nv, nu, nw = prop.shape
     store = np.zeros((nv, nu))
     
+    # Set store to be total flux in prop
     for j in range(0, nv - 1):
-        for i in range(0, nu - 1)"
-            totalflux = 
+        for i in range(0, nu - 1):
+            totalflux = iflux[j,i] - iflux[j,i+1] + jflux[j,i] - jflux[j+1,i]
+            store[j,i] = frkut * step[j,i] * totalflux * areas[j,i]
     
-    # Find the change in the variable "prop" in each cell over the time
-    # step "delta_t" and save it in store
-    for i in range(1, ni - 1):
-        for j in range(1, nj - 1):
-            totflux = (iflux[i,j
-            \) - iflux(i+1, j) + jflux(i,j) - jflux(i,j+1))
-            store(i,j) = deltat * totflux/area(i,j)
-
-    # Distribute the changes equally to the four corners of each cell. Each
-    # interior grid points receive one quarter of the change from each of the four
+    # Distribute the change equally to the four interior corners of each cell. 
+    # Each interior grid points receieve 1/4 of the change from the four
     # cells adjacent to it.
-    for i in range(0, ni - 1):
-        for j in range(0, nj - 1):
-            add = (store(i,j) + store(i-1, j-1) + store(i,j-1) + store(i-1,j)) * 0.25
-            prop(i,j) = prop(i,j) + add
-
-    # Now add the changes to the upper and lower boundaries. These receive half
-    # the change from each of the two cells adjacent to them.
-    for i in range(1,ni-1):
-        # add for the nodes with j = 1
-        add = (store(i,0) + store(i-1,0)) * 0.5
-        prop(i,0) = prop(i,0) + add
-
-        # add for the nodes with j = nj
-        add = (store(i,nj-1) + store(i-1,nj-1)) * 0.5
-        prop(i,j) = prop(i,nj) + add
-
-    # Now add the changes on to the four corner points. These receive the full
-    # change from the single cell of which they form one corner.
-    # for  i = 0, j = 0
-    add = store(0,0)
-    prop(0,0) = prop(0,0) + add
-    # for i = 0, j = nj
-    add = store(0,nj - 1)
-    prop(0,nj) = prop(0,nj) + add
-    # for i = ni, j = 0
-    add = store(ni - 1, 0)
-    prop(ni, 0) = prop(ni, 0) + add
-    # for i=ni, j=nj
-    add = store(ni - 1, nj - 1)
-    prop(ni,nj) = prop(ni,nj) + add
-
-    # Now save these changes in the primary variables as delprop
-    for i in range(0,ni - 1):
-        for j in range(0, nj - 1):
-            delprop(i,j) = store(i,j)
+    for j in range(1, nv - 1):
+        for i in range(1, nu - 1):
+            add = 0.25 * (store[j,i] + store[j-1,i-1] + store[j-1,i] + store[j,i-1])
+            prop[j,i,0] = prop_start[j,i,0] + frkut*add
+    
+    # add the changes to the upper and lower boundaries -- these receieve half the
+    # change from each of the two cells adjacent to them...
+    for i in range(1, nu - 1):
+        
+        # add to nodes with j = 0
+        add = 0.5 * ( store[0,i] + store[0,i-1] )
+        prop[0,i,0] = prop_start[0,i,0] + frkut*add
+    
+        # add to nodes with j = nv
+        add = 0.5 * (store[nv-1,i] + store[nv-1,i])
+        prop[nv-1,i,0] = prop_start[nv-1,i,0] + frkut * add
+    
+    # Now add on the extra changes to the inlet and outlet
+    for j in range(1, nv - 1):
+        
+        # add to nodes with i = nu
+        add = 0.5 * (store[j, nu - 1] + store[j-1, nu - 1] )
+        prop[j, nu - 1, 0] = prop_start[j, nu - 1, 0 ] + frkut*add
+        
+        # add to ntoes with i = 0
+        add = 0.5 * (store[j, 0] + store[j-1, 0])
+        prop[j, 0, 0] = prop_start[j, 0, 0] + frkut * add
+    
+    # For the node with i = 0, j = 0
+    add = store[0,0]
+    prop[0,0,0] = prop_start[0,0,0] + frkut * add
+    
+    # For the node with i = 0, j = nv - 1
+    add = store[nv-1,0]
+    prop[nv-1,0,0] = prop_start[nv-1,0,0] + frkut * add
+    
+    # For the node with i = nu - 1, j = 0
+    add = store[0, nu - 1]
+    prop[0, nu - 1, 0] = prop_start[0, nu - 1, 0] + frkut * add
+    
+    # For the node with i = nu -1, j = nv - 1
+    add = store[nv-1, nu-1]
+    prop[nv-1,nu-1,0] = prop_start[nv-1,nu-1,0] + frkut * add
+    
+    # Now save the changes in the primary variable as delprop
+    for j in range(0, nv-1):
+        for i in range(0, nu-1):
+            delprop[j,i] = store[j,i]
+            

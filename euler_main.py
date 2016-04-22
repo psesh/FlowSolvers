@@ -1,5 +1,7 @@
-#!/usr/bin/python
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 import numpy as np
+from initialize import initial_setup
+import fluxes as flux
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                               "Tungsten"
@@ -19,6 +21,21 @@ Features
 
 
 def main():
+    
+    # Setup the grid and compute the initial flow solution
+    primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup()
+    
+    
+    # Set the timestepping
+    set_timestep()
+    
+    # Time-marching loop
+    continue_flag = 0
+    while continue_flag == 0:    
+        
+        flux.set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters)
+    
+    
 
     # Read in the geometry and flow conditions
     read_data()
@@ -64,33 +81,4 @@ def main():
             break
 
 
-
-" Compute secondary flow variables from the primary ones at each grid point"
-" primary variables: ro, rovx, rovy, roe"
-" secondary variables: vx, vy, p, hstag"
-def set_other_flow_properties():
-
-    for i in range(0, ni):
-        for j in range(0, nj):
-            global vx(i,j) = rovx(i,j)/ro(i,j)
-            global vy(i,j) = rovy(i,j)/ro(i,j)
-            e = roe(i,j)/ro(i,j)
-            t = (e - 0.5*vx(i,j)**2 - 0.5*vy(i,j)**2)/cv
-            global p(i,j) = ro(i,j) * rgas * t
-            global hstag(i,j) = cp * tstagin
-
-
-def set_timestep():
-
-    astag = np.sqrt(gamma * rgas * tstagin)
-    umax = astag
-
-    # compute delta_t
-    deltat = cfl * dmin/(astag + umax)
-
-
-"""
-This subroutine smooths the variable "prop" (i.e. it adds the artificial viscosity
-) by taking (1-SF) * the calculated value of "prop" + SF x (the average of the surrounding
-values of "prop"). Here SF is the smoothing factor
-"""
+main()

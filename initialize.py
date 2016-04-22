@@ -4,7 +4,7 @@ from geometry import create_grid
 import numpy as np
 
 # Generate an initial flow solution based off the flow conditions and the geometry
-def initial_guess():
+def initial_setup():
     
     # Geometry parameters:
     nu, nv, nw = 120, 60, 1
