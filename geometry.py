@@ -58,9 +58,6 @@ def create_grid(nu, nv, nw):
     dljx = np.zeros((nv, nu, nw))
     dljy = np.zeros((nv, nu, nw))
     
-    # Preliminaries
-    ncells = (nv - 1) * (nu - 1) * (nw - 1)
-    npoints = nv * nu * nw
     
     # Inlet
     for i in range(0, nv):
@@ -132,10 +129,6 @@ def create_grid(nu, nv, nw):
         for i in range(0, nu - 1):
             dljx[j,i,0] = -point_y[j,i+1,0] + point_y[j,i,0]
             dljy[j,i,0] = point_x[j,i+1,0] - point_x[j,i,0]
-    
-    
-    # Converting from points to VTK readable format!
-    #gridToVTK("./structured", point_x, point_y, point_z)
 
     # Compute the areas!
     areas = compute_areas(point_x, point_y)
@@ -145,5 +138,14 @@ def create_grid(nu, nv, nw):
     grid_parameters[0] = point_x
     grid_parameters[1] = point_y
     grid_parameters[2] = point_z
+    grid_parameters[3] = xlow
+    grid_parameters[4] = ylow
+    grid_parameters[5] = xhigh
+    grid_parameters[6] = yhigh
+    grid_parameters[7] = areas
+    grid_parameters[8] = dlix
+    grid_parameters[9] = dliy
+    grid_parameters[10] = dljx
+    grid_parameters[11] = dljy
     
-    return point_x, point_y, point_z, xlow, ylow, xhigh, yhigh, areas, dlix, dliy, dljx, dljy
+    return grid_parameters
