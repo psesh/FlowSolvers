@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 19 07:31:57 2016
-
-@author: pseshadr
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 """
 
-"""~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Class for setting the fluxes. 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 set_fluxes()
 
@@ -18,8 +15,21 @@ fluxi_enth(i,j) |  fluxj_enth(i,j)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-def set_fluxes():
-
+def set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditions):
+    
+        
+    # "Unpack" the fluxes
+    flux_i_mass = fluxes[0], 
+    flux_j_mass = fluxes[1], 
+    flux_i_xmom = fluxes[2]
+    flux_j_xmom = fluxes[3] 
+    flux_i_ymom = fluxes[4]
+    flux_j_ymom = fluxes[5]
+    flux_i_enthalpy = fluxes[6]
+    flux_j_enthalpy = fluxes[7]
+    
+    # "Unpack" the primary flow variables
+        
     #--------------------------------------------------------------------------
     # Calculate the mass fluxes
     #--------------------------------------------------------------------------

@@ -1,7 +1,5 @@
-#!/usr/bin/python
-#from evtk.hl import gridToVTK, pointsToVTK
+#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
 import numpy as np
-import random as rnd
 
 """
     Objectives:
@@ -43,10 +41,6 @@ def create_grid(nu, nv, nw):
     yc = -20.0
     r = np.sqrt(xc*xc + yc*yc)
 
-
-    ncells = (nv - 1) * (nu - 1) * (nw - 1)
-    npoints = nv * nu * nw
-
     # Storing data for each point in the grid!
     point_x = np.zeros((nv , nu , nw ))
     point_y = np.zeros((nv , nu , nw ))
@@ -57,6 +51,16 @@ def create_grid(nu, nv, nw):
     ylow = np.zeros((nu, 1))
     xhigh = np.zeros((nu, 1))
     yhigh = np.zeros((nu, 1))
+    
+    # Projected lengths
+    dlix = np.zeros((nv, nu, nw))
+    dliy = np.zeros((nv, nu, nw))
+    dljx = np.zeros((nv, nu, nw))
+    dljy = np.zeros((nv, nu, nw))
+    
+    # Preliminaries
+    ncells = (nv - 1) * (nu - 1) * (nw - 1)
+    npoints = nv * nu * nw
     
     # Inlet
     for i in range(0, nv):
@@ -83,7 +87,6 @@ def create_grid(nu, nv, nw):
         point_z[0,i,0] = 0
         xlow[i,0] = point_x[0,i,0]
         ylow[i,0] = point_y[0,i,0]
-        
         
     # Top defn'
     for i in range(0, nu):
@@ -116,10 +119,31 @@ def create_grid(nu, nv, nw):
                 point_z[j,i,k] = first_partc + second_partc
 
 
+    # Once we have computed the coordinates we need to compute dlix, dliy, dljx, dljy
+    # These projected lengths are the components of a vector of magnitude equal to 
+    # the length of the face but directed perpendicular to the face. Because every face is 
+    # common to two elements you only need to do this for two of the faces of each element.
+    for j in range(0, nv - 1):
+        for i in range(0, nu):
+            dlix[j,i,0] = point_y[j+1,i,0] - point_y[j,i,0]
+            dliy[j,i,0] = -point_x[j+1,i,0] + point_x[j,i,0]
+    
+    for j in range(0,nv):
+        for i in range(0, nu - 1):
+            dljx[j,i,0] = -point_y[j,i+1,0] + point_y[j,i,0]
+            dljy[j,i,0] = point_x[j,i+1,0] - point_x[j,i,0]
+    
+    
     # Converting from points to VTK readable format!
     #gridToVTK("./structured", point_x, point_y, point_z)
 
     # Compute the areas!
     areas = compute_areas(point_x, point_y)
-
-    return point_x, point_y, point_z, xlow, ylow, xhigh, yhigh, areas
+    
+    # "Pack" it up
+    grid_parameters = {}
+    grid_parameters[0] = point_x
+    grid_parameters[1] = point_y
+    grid_parameters[2] = point_z
+    
+    return point_x, point_y, point_z, xlow, ylow, xhigh, yhigh, areas, dlix, dliy, dljx, dljy
