@@ -2,8 +2,13 @@
 import numpy as np
 
 """
-    Subroutine smooths a given variable, "prop" by adding aritificial
-    viscosity to it!
+Subroutine that 
 
+    Inputs:
+        primary_variables
+        secondary_variables
+
+    Outputs:
+        secondary_variables
 """
 def smooth(prop, corr_prop):

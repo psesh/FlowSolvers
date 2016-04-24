@@ -62,3 +62,5 @@ def set_timestep(primary_variables, secondary_variables, boundary_conditions, gr
 
     aaverage = np.sqrt(gamma * pressure[nv - 1, nu - 1] / ro[nv - 1, nu - 1])
     step[nv - 1, nu - 1] = cfl * dmin[nv - 1, nu - 1]/ (velocity_magnitude[nv - 1, nu - 1] + aaverage)
+
+    return step

@@ -149,8 +149,6 @@ def create_grid(nu, nv, nw):
     # Compute the areas!
     areas = compute_areas(point_x, point_y)
 
-    " DO SOMETHING WITH THE AREAS!!! --> check for neg areas!!
-    
     # "Pack" it up
     grid_parameters = {}
     grid_parameters[0] = point_x
