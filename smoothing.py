@@ -7,5 +7,7 @@ import numpy as np
 
 """
 def smoothing(prop, corr_prop):
-    
+
+    # What is corrprop?
+
     
