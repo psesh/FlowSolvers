@@ -1,4 +1,4 @@
-#!/Library/Frameworks/Python.framework/Versions/2.7/bin/python
+#!/usr/bin/python
 import numpy as np
 
 """
@@ -29,7 +29,7 @@ def compute_areas(x, y):
             AC = np.array((C[0] - A[0], C[1] - A[1], 0 ))
             BD = np.array((D[0] - B[0], D[1] - B[1], 0 ))
             areas[j,i] = 1/2 * np.linalg.norm(np.cross(AC, BD))
-    
+
     return areas
 
 # Create a grid!
@@ -45,20 +45,22 @@ def create_grid(nu, nv, nw):
     point_x = np.zeros((nv , nu , nw ))
     point_y = np.zeros((nv , nu , nw ))
     point_z = np.zeros((nv , nu , nw ))
-    
+
     # Storing upper and lower boundary values only!
     xlow = np.zeros((nu, 1))
     ylow = np.zeros((nu, 1))
     xhigh = np.zeros((nu, 1))
     yhigh = np.zeros((nu, 1))
-    
+
     # Projected lengths
     dlix = np.zeros((nv, nu, nw))
     dliy = np.zeros((nv, nu, nw))
     dljx = np.zeros((nv, nu, nw))
     dljy = np.zeros((nv, nu, nw))
-    
-    
+    dmi = np.zeros((nv, nu, nw))
+    dmj = np.zeros((nv, nu, nw))
+    dmin = np.zeros((nv, nu, nw)) # minimum length scale of any element. *Used to set time step!
+
     # Inlet
     for i in range(0, nv):
         point_x[i,0,0] = 0.0
@@ -84,7 +86,7 @@ def create_grid(nu, nv, nw):
         point_z[0,i,0] = 0
         xlow[i,0] = point_x[0,i,0]
         ylow[i,0] = point_y[0,i,0]
-        
+
     # Top defn'
     for i in range(0, nu):
         point_x[nv-1,i,0] = x1 - r*np.cos(theta1 + (theta2 - theta1)/(nu - 1) * i )
@@ -92,7 +94,7 @@ def create_grid(nu, nv, nw):
         point_z[nv-1,i,0] = 0
         xhigh[i,0] = point_x[nv-1,i,0]
         yhigh[i,0] = point_y[nv-1,i,0]
-        
+
     # For loop to implement Coon's patch! (thanks Caleb!)
     for k in range(0, nw):
         for j in range(0, nv):
@@ -117,22 +119,36 @@ def create_grid(nu, nv, nw):
 
 
     # Once we have computed the coordinates we need to compute dlix, dliy, dljx, dljy
-    # These projected lengths are the components of a vector of magnitude equal to 
-    # the length of the face but directed perpendicular to the face. Because every face is 
+    # These projected lengths are the components of a vector of magnitude equal to
+    # the length of the face but directed perpendicular to the face. Because every face is
     # common to two elements you only need to do this for two of the faces of each element.
     for j in range(0, nv - 1):
         for i in range(0, nu):
             dlix[j,i,0] = point_y[j+1,i,0] - point_y[j,i,0]
             dliy[j,i,0] = -point_x[j+1,i,0] + point_x[j,i,0]
-    
+            dmi[j,i,0] = np.sqrt(dlix[j,i]**2 + dliy[j,i]**2)
+
     for j in range(0,nv):
         for i in range(0, nu - 1):
             dljx[j,i,0] = -point_y[j,i+1,0] + point_y[j,i,0]
             dljy[j,i,0] = point_x[j,i+1,0] - point_x[j,i,0]
+            dmj[j,i,0] = np.sqrt(dljx[j,i]**2 + dljy[j,i]**2)
+
+    # Now compute "dmin":
+    for j in range(0, nv - 1):
+        for i in range(0, nu - 1):
+            dmin[j,i,0] = np.min([dmi[j,i,0], dmj[j,i,0]])
+
+    # Boundaries
+    for i in range(0, nu - 1):
+        dmin[nv-1, i, 0] = dmj[nv-1, i]
+
+    for j in range(0, nv - 1):
+        dmin[j, nu - 1, 0] = dmi[j, nu - 1, 0]
 
     # Compute the areas!
     areas = compute_areas(point_x, point_y)
-    
+
     # "Pack" it up
     grid_parameters = {}
     grid_parameters[0] = point_x
@@ -147,5 +163,6 @@ def create_grid(nu, nv, nw):
     grid_parameters[9] = dliy
     grid_parameters[10] = dljx
     grid_parameters[11] = dljy
-    
+    grid_parameters[12] = dmin
+
     return grid_parameters
