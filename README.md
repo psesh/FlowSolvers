@@ -10,7 +10,7 @@ Currently, the code has the following characteristics:
    - Stable solution via artificial viscosity
    - 2D structured grid generation
 
-
+Code uses evtk.hl libraries for converting structured data to a paraview file for post-processing.
 
 Pranay Seshadri <br>
 University of Cambridge <br>
