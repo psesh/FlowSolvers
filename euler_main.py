@@ -24,13 +24,21 @@ from convergence import check_convergence
        6. fluxes.py
        7. geometry.py
 
+       Questions:
+       1. What is frkut / delro / corr_prop / fcorr?
+       2. Why the dual loop for frkut and fluxes?
 
+       Big things left:
+       1. convergence
+       2. smoothing
+       3.
 ################################################################################
 """
 def main():
 
 
     # Setup the grid and compute the initial flow solution
+    nu, nv, nw =
     primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup()
     areas = grid_parameters[7] # Will need this for later!
 
@@ -40,7 +48,8 @@ def main():
     # Time-marching loop
     continue_flag = 0
 
-
+    # Initialize some starting values!
+    ro_start =
     display_item =
     """
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,6 +66,8 @@ def main():
     # Two for-loops
     for step_number in range(1, nsteps):
         for nrkut in range(1, 5):
+
+            # Define some starting values!
 
             # setting frkut
             frkut = 1.0/(1.0 + 4 - nrkut)
@@ -81,10 +92,10 @@ def main():
             flux_j_enthalpy = fluxes[7]
 
             # Sum the fluxes
-            ro, del_ro = sum_fluxes(flux_i_mass, flux_j_mass, ro, ro_start, del_ro, frkut, step, areas)
-            ro_vel_x, del_ro_vel_x = sum_fluxes(flux_i_xmom, flux_j_xmom, ro_vel_x, ro_vel_x_start, del_ro_vel_x, frkut, step, areas)
-            ro_vel_y, del_ro_vel_y = sum_fluxes(flux_i_ymom, flux_j_ymom, ro_vel_y, ro_vel_y_start, del_ro_vel_y, frkut, step, areas)
-            ro_energy, del_ro_energy = sum_fluxes(flux_i_enthalpy, flux_j_enthalpy, ro_energy, ro_energy_start, del_ro_energy, frkut, step, areas)
+            ro, del_ro = fluxes.sum_fluxes(flux_i_mass, flux_j_mass, ro, ro_start, del_ro, frkut, step, areas)
+            ro_vel_x, del_ro_vel_x = fluxes.sum_fluxes(flux_i_xmom, flux_j_xmom, ro_vel_x, ro_vel_x_start, del_ro_vel_x, frkut, step, areas)
+            ro_vel_y, del_ro_vel_y = fluxes.sum_fluxes(flux_i_ymom, flux_j_ymom, ro_vel_y, ro_vel_y_start, del_ro_vel_y, frkut, step, areas)
+            ro_energy, del_ro_energy = fluxes.sum_fluxes(flux_i_enthalpy, flux_j_enthalpy, ro_energy, ro_energy_start, del_ro_energy, frkut, step, areas)
 
             # FINISH THE SMOOTHING!
 
