@@ -6,8 +6,4 @@ import numpy as np
     viscosity to it!
 
 """
-def smoothing(prop, corr_prop):
-
-    # What is corrprop?
-
-    
+def smooth(prop, corr_prop):

@@ -2,66 +2,46 @@
 import numpy as np
 from initialize import initial_setup
 import fluxes as flux
-"""
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                              "Tungsten"
-                              ver. 1.0.0
-
-                    Copyright (c) 2015 by Pranay Seshadri
-
-Features
-- 2D finite volume Euler code
-- Lax-Friedrichs method
-- time derivatives obtained by central differencing
-- solution stabilized by artifical viscosity
-
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
-
-
+from boundary_conditions import apply_boundary_conditions
+from timestepping import set_timestep
+from smoothing import smooth
+from convergence import check_convergence
 def main():
-    
+
     # Setup the grid and compute the initial flow solution
     primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup()
-    
-    
+
+
     # Set the timestepping
     set_timestep()
-    
+
     # Time-marching loop
     continue_flag = 0
-    while continue_flag == 0:    
-        
-        flux.set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters)
-    
-    
 
-    # Read in the geometry and flow conditions
-    read_data()
 
-    # Generate the grid coordinates, element areas and projected lengths of the
-    # sides of the elements
-    generate_grid()
+    display_item =
+    """
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                   TUNGSTEN
+                                  ver. 1.0.0
 
-    # Check that the areas and the projected lengths are correct
-    check_grid()
+                        Copyright (c) 2016 by Pranay Seshadri
+                      University of Cambridge, Cambridge, U.K.
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    """
+    print(display_item)
+    while continue_flag == 0:
 
-    # Initial solution
-    flow_guess()
 
-    # Set the length of the timestep. Initially this is a constant time step
-    # based on a conservative guess of the Mach number
-    set_timestep()
 
-    # time stepping for the
-    while True:
 
         set_other_flow_properties()
 
         apply_boundary_conditions()
 
-        set_fluxes()
+
+        # Set the fluxes!
+        flux.set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters)
 
         # Sum the fluxes
         sum_fluxes(fluxi_mass, fluxj_mass, ro, delro)

@@ -11,10 +11,6 @@ import numpy as np
 """
 def set_timestep(primary_variables, secondary_variables, boundary_conditions, grid_parameters):
 
-
-    nu, nv, nw = ?
-
-
     # Unpack the primary and secondary flow variables
     point_x = grid_parameters[0]
     vel_x = secondary_variables[0]
@@ -24,7 +20,7 @@ def set_timestep(primary_variables, secondary_variables, boundary_conditions, gr
     gamma = boundary_conditions[1]
     cfl = boundary_conditions[6]
     dmin = grid_parameters[12]
-    nv, nu, nw = x.shape
+    nv, nu, nw = point_x.shape
 
     # Velocity magnitude
     velocity_magnitude = np.zeros((nu, nv))
