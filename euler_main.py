@@ -97,8 +97,11 @@ def main():
             ro_vel_y, del_ro_vel_y = fluxes.sum_fluxes(flux_i_ymom, flux_j_ymom, ro_vel_y, ro_vel_y_start, del_ro_vel_y, frkut, step, areas)
             ro_energy, del_ro_energy = fluxes.sum_fluxes(flux_i_enthalpy, flux_j_enthalpy, ro_energy, ro_energy_start, del_ro_energy, frkut, step, areas)
 
-            # FINISH THE SMOOTHING!
-
+            # Smoothing!
+            ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
+            ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
+            ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
+            ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
 
             # Pack everything up!
             primary_variables[0] = ro

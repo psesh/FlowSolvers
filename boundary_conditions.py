@@ -59,6 +59,7 @@ def set_other_variables(primary_variables, secondary_variables, boundary_conditi
     secondary_variables[3] = enthalpy_stag
 
     return secondary_variables
+
 """
 Subroutine applies the boundary conditions that pressure = pressure_static_exit
 at the exit. At the inlet boundary, the change in the density is relaxed.
