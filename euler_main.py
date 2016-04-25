@@ -38,18 +38,26 @@ def main():
 
 
     # Setup the grid and compute the initial flow solution
-    nu, nv, nw =
-    primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup()
+    nu, nv, nw = 120, 60, 1
+    primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup(nu, nv, nw)
     areas = grid_parameters[7] # Will need this for later!
 
     # Set the time-step
     step = set_timestep(primary_variables, secondary_variables, boundary_conditions, grid_parameters):
 
-    # Time-marching loop
-    continue_flag = 0
+    # Output iteration frequency
+    niter = 3
 
     # Initialize some starting values!
-    ro_start =
+    ro_start = np.zeros((nv, nu, nw))
+    ro_vel_x_start = np.zeros((nv, nu, nw))
+    ro_vel_y_start = np.zeros((nv, nu, nw))
+    ro_energy_start = np.zeros((nv, nu, nw))
+
+
+
+
+    # Display the following message everytime the program is initialized
     display_item =
     """
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,5 +116,7 @@ def main():
             primary_variables[1] = ro_vel_x
             primary_variables[2] = ro_vel_y
             primary_variables[3] = ro_energy
+
+        # Write out convergence parameters at every niter iterations
 
 main()
