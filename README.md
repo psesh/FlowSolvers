@@ -15,3 +15,7 @@ Code uses evtk.hl libraries for converting structured data to a paraview file fo
 Pranay Seshadri <br>
 University of Cambridge <br>
 ps583 <at> cam.ac.uk
+<br>
+To do:<br>
+  - Convergence
+  - Debugging
