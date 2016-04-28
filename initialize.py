@@ -2,6 +2,11 @@
 from evtk.hl import gridToVTK
 from geometry import create_grid
 import numpy as np
+from boundary_conditions import set_other_variables
+
+
+def set_starting_values(primary_variables):
+    return primary_variables
 
 # Generate an initial flow solution based off the flow conditions and the geometry
 def initial_setup(nu, nv, nw):
@@ -165,5 +170,6 @@ def initial_setup(nu, nv, nw):
     fluxes[7] = flux_j_enthalpy
     fluxes[8] = flow
 
+    secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
     return primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters

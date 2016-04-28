@@ -11,7 +11,13 @@ steps and writes a short output summary on screen and to a file!
     Outputs:
         ??
 """
-def check_convergence(primary_variables, old_primary_variables, reference_values, nstep):
+def check_convergence(grid_parameters, primary_variables, old_primary_variables, reference_values, nstep, ncells):
+
+    # Loop parameters
+    point_x = grid_parameters[0]
+    point_y = grid_parameters[1]
+    point_z = grid_parameters[2]
+    nv, nu, nw = point_x.shape
 
     # Unpack the primary flow variables
     ro = primary_variables[0]
@@ -47,6 +53,8 @@ def check_convergence(primary_variables, old_primary_variables, reference_values
 
     imax = 0 # These are indices!
     jmax = 0
+    emax = 0
+    eavg = 0
 
     #[imax, jmax] is the grid point where the change in rovx is a max
     for j in range(0, nv):
@@ -54,7 +62,7 @@ def check_convergence(primary_variables, old_primary_variables, reference_values
 
             # 1 ) Density
             delta = np.abs(ro[j,i,0] - old_ro[j, i, 0])
-            if( delta > delromax ):
+            if( delta > del_ro_max ):
                 del_ro_max = delta
                 del_ro_avg = del_ro_avg + delta
 
@@ -80,7 +88,7 @@ def check_convergence(primary_variables, old_primary_variables, reference_values
 
 
     # Compute the average changes
-    del_ro_avg = del_ro_avg / ncells / reference_ro
+    del_ro_avg = del_ro_avg / ncells / ref_ro
     del_ro_vel_x_avg = del_ro_vel_x_avg / ncells / ref_ro_vel_x
     del_ro_vel_y_avg = del_ro_vel_y_avg / ncells / ref_ro_vel_y
     del_ro_energy_avg = del_ro_energy_avg / ncells /  ref_ro_energy
@@ -106,6 +114,6 @@ def check_convergence(primary_variables, old_primary_variables, reference_values
 
     # On-screen output
     print("------ Time Step Number ----- %i" %nstep)
-    print("Emax = %d , at imax = %d , at jmax = %d , eavg = %d " %(emax, imax, jmax, eavg) )
+    print("Emax = "+str(emax)+", at imax = "+str(imax)+", at jmax = "+str(jmax)+" , eavg = "+str(eavg)+"\n")
 
     return old_primary_variables

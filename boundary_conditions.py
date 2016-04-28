@@ -48,8 +48,8 @@ def set_other_variables(primary_variables, secondary_variables, boundary_conditi
     # Compute the new secondary values!
     for j in range(0, nv):
         for i in range(0, nu):
-            vel_x[j,i,0] = ro_vel_x[j,i,0] / ro[j,i,0]
-            vel_y[j,i,0] = ro_vel_y[j,i,0] / ro[j,i,0]
+            vel_x[j,i,0] = ro_vel_x[j,i,0] /(1.0 * ro[j,i,0])
+            vel_y[j,i,0] = ro_vel_y[j,i,0] /(1.0 * ro[j,i,0])
             enthalpy_stag[j,i,0] = cp * temp_stag_inlet
             kinetic_energy = 0.5 * (vel_x[j,i,0] * vel_x[j,i,0] + vel_y[j,i,0] * vel_y[j,i,0])
             temperature = (enthalpy_stag[j,i,0] - kinetic_energy ) / (1.0 * cp)
