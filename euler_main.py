@@ -44,18 +44,13 @@ def main():
 
     primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup(nu, nv, nw)
     areas = grid_parameters[7] # Will need this for later!
-
+    print 'areas'
+    #print areas
     # Set the time-step
     step = set_timestep(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
     # Output iteration frequency
     niter = 5
-
-    # Initialize some starting values!
-    ro_start = np.zeros((nv, nu, nw))
-    ro_vel_x_start = np.zeros((nv, nu, nw))
-    ro_vel_y_start = np.zeros((nv, nu, nw))
-    ro_energy_start = np.zeros((nv, nu, nw))
 
     # Initialize delta properties
     del_ro = np.zeros((nv, nu))
@@ -98,12 +93,10 @@ def main():
             secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
             # Enforce boundary conditions
-            #primary_variables, secondary_variables = apply_boundary_conditions(step_number, primary_variables, secondary_variables, boundary_conditions, grid_parameters)
-
+            primary_variables, secondary_variables = apply_boundary_conditions(step_number, primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
             # Set the fluxes!
             fluxes = flux.set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters)
-
 
             # Unpack the fluxes
             flux_i_mass = fluxes[0]
@@ -121,8 +114,6 @@ def main():
             ro_vel_y = primary_variables[2]
             ro_energy = primary_variables[3]
 
-
-
             # Unpack the starting variables
             start_ro = starting_variables[0]
             start_ro_vel_x = starting_variables[1]
@@ -135,17 +126,14 @@ def main():
             ro_vel_y, del_ro_vel_y = flux.sum_fluxes(flux_i_ymom, flux_j_ymom, ro_vel_y, start_ro_vel_y, del_ro_vel_y, frkut, step, areas)
             ro_energy, del_ro_energy = flux.sum_fluxes(flux_i_enthalpy, flux_j_enthalpy, ro_energy, start_ro_energy, del_ro_energy, frkut, step, areas)
 
-
-
             # Smoothing!
-            ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
-            ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
-            ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
-            ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
+            #ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
+            #ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
+            #ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
+            #ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
 
-            plot_to_grid(grid_parameters, primary_variables, secondary_variables)
-            time.sleep(3600)
-
+            # Recompute the secondary variables
+            secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
             # Pack everything up!
             primary_variables[0] = ro
@@ -153,10 +141,14 @@ def main():
             primary_variables[2] = ro_vel_y
             primary_variables[3] = ro_energy
 
+
+
         # Write out convergence parameters at every niter iterations
         if(np.mod(step_number, niter) == 0):
 
-            primary_variables = check_convergence(grid_parameters, primary_variables, starting_variables, reference_values, step_number, ncells)
-            plot_to_grid(grid_parameters, primary_variables, secondary_variables)
+            check_convergence(grid_parameters, primary_variables, starting_variables, reference_values, step_number, ncells)
+            plot_to_grid(grid_parameters, primary_variables, secondary_variables, step_number)
+            starting_variables = primary_variables
 
+            step = set_timestep(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 main()

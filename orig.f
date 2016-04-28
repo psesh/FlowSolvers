@@ -753,7 +753,7 @@ C
 
 	flow(i) = flow(i) + fluxi_mass(i,j)
 
-      end do
+      end dow
       end do
 
 c

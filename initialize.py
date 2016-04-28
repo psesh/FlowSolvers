@@ -98,13 +98,17 @@ def initial_setup(nu, nv, nw):
 
     #----------------------------------------------
     #
-    # Crude guess subroutine
+    # new guess subroutine
     #
     #-----------------------------------------------
     jmid = nv / 2.0
     temp_static_exit = temp_stag_inlet * (pressure_static_exit/pressure_stag_inlet)**gamma_factor
     vel_exit = np.sqrt(2 * cp * (temp_stag_inlet - temp_static_exit))
     ro_exit = pressure_static_exit / rgas / temp_static_exit
+    pressure_static_inlet = 55000
+    temp_static_inlet = temp_stag_inlet * (pressure_static_inlet / pressure_stag_inlet)**gamma_factor
+    vel_inlet = np.sqrt(2 * cp * (temp_stag_inlet - temp_static_inlet))
+    ro_inlet = pressure_static_inlet / rgas / temp_static_inlet
 
     # Get the grid!
     grid_parameters = create_grid(nu, nv, nw)
@@ -112,18 +116,35 @@ def initial_setup(nu, nv, nw):
     point_y = grid_parameters[1]
     point_z = grid_parameters[2]
 
+    # Initial guess!
+    for j in range(0, nv):
+        for i in range(0, nu):
+            ro[j,i,0] = 1.2
+            ro_vel_x[j,i,0] = 100 * (i * 1.0)/(nu * 1.0)
+            ro_vel_y[j,i,0] = 0.0
+            pressure[j,i,0] = 100000 * (0.9 + 0.1 * (i * 1.0)/(nu * 1.0))
+            enthalpy_stag[j,i,0] = 300000
+            ro_energy[j,i,0] = pressure[j,i,0] / (gamma - 1.0)
+
 
     for j in range(0, nv):
         for i in range(0, nu-1):
             dx = point_x[jmid, i+1, 0] - point_x[jmid, i, 0]
             dy = point_y[jmid, i+1, 0] - point_y[jmid, i, 0]
             ds = np.sqrt(dx*dx + dy*dy)
-            velx = vel_exit * dx / ds
-            vely = vel_exit * dy / ds
-            ro_vel_x[j,i,0] = ro_exit * velx
-            ro_vel_y[j,i,0] = ro_exit * vely
-            ro[j,i,0] = ro_exit
-            ro_energy[j,i,0] = ro_exit * (cv * temp_static_exit + 0.5 * vel_exit * vel_exit)
+
+            vel_local = vel_inlet + (vel_exit - vel_inlet)* (1.0 * (i-1.0)/(nu - 1.0) )
+            ro_local = ro_inlet + (ro_exit - ro_inlet)* (1.0 * (i-1.0)/(nu - 1.0) )
+            temp_local = temp_static_inlet + (temp_static_exit - temp_static_inlet)* (1.0 * (i-1.0)/(nu - 1.0) )
+
+
+            velx = vel_local * dx / ds
+            vely = vel_local * dy / ds
+
+            ro_vel_x[j,i,0] = ro_local * velx
+            ro_vel_y[j,i,0] = ro_local * vely
+            ro[j,i,0] = ro_local
+            ro_energy[j,i,0] = ro_local * (cv * temp_local + 0.5 * vel_local * vel_local)
 
         ro_vel_x[j,nu-1,0] = ro_vel_x[j,nu-2,0]
         ro_vel_y[j,nu-1,0] = ro_vel_y[j,nu-2,0]
@@ -136,7 +157,7 @@ def initial_setup(nu, nv, nw):
     # Output initial flow solution with grid
     #
     #-------------------------------------------------------------------------
-    gridToVTK("./structured", point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro, "density-velx": ro_vel_x })
+    gridToVTK("./initial_flow", point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro, "density-velx": ro_vel_x })
 
     #-------------------------------------------------------------------------
     #

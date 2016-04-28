@@ -92,8 +92,8 @@ def check_convergence(grid_parameters, primary_variables, old_primary_variables,
     del_ro_vel_x_avg = del_ro_vel_x_avg / ncells / ref_ro_vel_x
     del_ro_vel_y_avg = del_ro_vel_y_avg / ncells / ref_ro_vel_y
     del_ro_energy_avg = del_ro_energy_avg / ncells /  ref_ro_energy
-    del_ro_vel_x_max = del_ro_vel_x_max / ref_ro_vel_x
-    del_ro_vel_y_max = del_ro_vel_y_max / ref_ro_vel_y
+    del_ro_vel_x_max = del_ro_vel_x_max /(1.0 * ref_ro_vel_x)
+    del_ro_vel_y_max = del_ro_vel_y_max /(1.0 * ref_ro_vel_y)
 
     emax = np.max([del_ro_vel_x_max, del_ro_vel_y_max])
     eavg = np.average([del_ro_vel_x_avg, del_ro_vel_y_avg])
@@ -116,4 +116,4 @@ def check_convergence(grid_parameters, primary_variables, old_primary_variables,
     print("------ Time Step Number ----- %i" %nstep)
     print("Emax = "+str(emax)+", at imax = "+str(imax)+", at jmax = "+str(jmax)+" , eavg = "+str(eavg)+"\n")
 
-    return old_primary_variables
+    #return old_primary_variables

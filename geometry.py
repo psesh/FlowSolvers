@@ -19,6 +19,7 @@ def compute_areas(x, y):
     # the vectors AC and BD for each cell and then computing its area!
     nv, nu, nw = x.shape
 
+
     areas = np.zeros((nv, nu))
     for j in range(0, nv - 1):
         for i in range(0, nu - 1):
@@ -28,8 +29,7 @@ def compute_areas(x, y):
             D = np.array(( x[j+1,i,0], y[j+1,i,0] ) )
             AC = np.array((C[0] - A[0], C[1] - A[1], 0 ))
             BD = np.array((D[0] - B[0], D[1] - B[1], 0 ))
-            areas[j,i] = 1/2 * np.linalg.norm(np.cross(AC, BD))
-
+            areas[j,i] = 0.5 * np.linalg.norm(np.cross(AC, BD))
     return areas
 
 # Create a grid!
@@ -164,5 +164,6 @@ def create_grid(nu, nv, nw):
     grid_parameters[10] = dljx
     grid_parameters[11] = dljy
     grid_parameters[12] = dmin
+
 
     return grid_parameters

@@ -141,8 +141,8 @@ def sum_fluxes(iflux, jflux, prop, prop_start, delprop, frkut, step, areas):
     for j in range(0, nv - 1):
         for i in range(0, nu - 1):
             totalflux = iflux[j,i] - iflux[j,i+1] + jflux[j,i] - jflux[j+1,i]
-            store[j,i] = frkut * step[j,i] * totalflux * areas[j,i]
-
+            store[j,i] = frkut * step[j,i] * totalflux /(1.0 * areas[j,i])
+            
     # Distribute the change equally to the four interior corners of each cell.
     # Each interior grid points receieve 1/4 of the change from the four
     # cells adjacent to it.

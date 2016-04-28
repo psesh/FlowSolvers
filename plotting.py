@@ -2,7 +2,7 @@
 from evtk.hl import gridToVTK
 
 
-def plot_to_grid(grid_parameters, primary_variables, secondary_variables):
+def plot_to_grid(grid_parameters, primary_variables, secondary_variables, number):
 
 
     # Get the shape from the grid parameters
@@ -22,5 +22,5 @@ def plot_to_grid(grid_parameters, primary_variables, secondary_variables):
     vel_y = secondary_variables[1]
     pressure = secondary_variables[2]
     enthalpy_stag = secondary_variables[3]
-
-    gridToVTK("./output", point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro, "velx": vel_x, "vely": vel_y })
+    filename = "./output"+str(number)
+    gridToVTK(filename, point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro, "velx": vel_x, "vely": vel_y })
