@@ -11,71 +11,101 @@ steps and writes a short output summary on screen and to a file!
     Outputs:
         ??
 """
-def check_convergence():
+def check_convergence(primary_variables, old_primary_variables, reference_values, nstep):
 
-    delromax = 0.0
-    delrovxmax = 0.0
-    delrovymax = 0.0
-    delroemax = 0.0
-    delroavg = 0.0
-    delrovxavg = 0.0
-    delrovyavg = 0.0
-    delroeavg = 0.0
-    imax = 0.0
-    jmax = 0.0
+    # Unpack the primary flow variables
+    ro = primary_variables[0]
+    ro_vel_x = primary_variables[1]
+    ro_vel_y = primary_variables[2]
+    ro_energy = primary_variables[3]
+
+    # Unpack the old primary flow variables
+    old_ro = old_primary_variables[0]
+    old_ro_vel_x = old_primary_variables[1]
+    old_ro_vel_y = old_primary_variables[2]
+    old_ro_energy = old_primary_variables[3]
+
+    # Unpack the "reference values"
+    ref_ro = reference_values[0]
+    ref_ro_vel_x = reference_values[1]
+    ref_ro_vel_y = reference_values[2]
+    ref_ro_energy = reference_values[3]
+
+
+    # Declare some initial values
+    del_ro_max = 0.0
+    del_ro_vel_x_max = 0.0
+    del_ro_vel_y_max = 0.0
+    del_ro_energy_max = 0.0
+
+    # Average values
+    del_ro_avg = 0.0
+    del_ro_vel_x_avg = 0.0
+    del_ro_vel_y_avg = 0.0
+    del_ro_energy_avg = 0.0
+
+
+    imax = 0 # These are indices!
+    jmax = 0
 
     #[imax, jmax] is the grid point where the change in rovx is a max
-    for i in range(0, ni):
-        for j in range(0, nj):
+    for j in range(0, nv):
+        for i in range(0, nu):
 
-            delta = np.abs(ro[i,j] - ro_old[i,j] )
+            # 1 ) Density
+            delta = np.abs(ro[j,i,0] - old_ro[j, i, 0])
             if( delta > delromax ):
-                delromax = delta
+                del_ro_max = delta
+                del_ro_avg = del_ro_avg + delta
 
-            delta = np.abs(rovx[i,j] - rovx_old[i,j])
-            if(delta > delrovxmax ):
+            # 2 ) Density-X-velocity
+            delta = np.abs(ro_vel_x[j,i,0] - old_ro_vel_x[j,i,0])
+            if(delta > del_ro_vel_x_max):
+                del_ro_vel_x_max = delta
                 imax = i
                 jmax = j
+            del_ro_vel_x_avg = del_ro_vel_x_avg + delta
 
-            diffrovx[i,j] = delta
-            delrovxavg = delrovxavg + delta
-            delta = np.abs(rovy[i,j] - rovy_old[i,j])
-            if( delta > delrovymax):
-                delrovymax = delta
-            delrovyavg = delrovyavg + delta
+            # 3 ) Density-Y-velocity
+            delta = np.abs(ro_vel_y[j,i,0] - old_ro_vel_y[j,i,0])
+            if(delta > del_ro_vel_y_max):
+                del_ro_vel_y_max = delta
+            del_ro_vel_y_avg = del_ro_vel_y_avg + delta
 
-            delta = np.abs(roe[i,j] - roe_old[i,j])
-            if( delta > delroemax):
-                delroemax = delta
-            delroeavg = delroeavg + delta
+            # 4 ) Density-Energy
+            delta = np.abs(ro_energy[j,i,0] - old_ro_energy[j,i,0] )
+            if(delta > del_ro_energy_max):
+                del_ro_energy_max = delta
+            del_ro_energy_avg = del_ro_energy_avg + delta
+
 
     # Compute the average changes
-    delroavg = delroavg / ncells / ref_ro
-    delrovxavg = delrovxavg / ncells / ref_rovx
-    delrovyavg = delrovyavg / ncells / ref_rovy
-    delroeavg = delroeavg / ncells / ref_roe
-    delrovxmax = delrovxmax / ref_rovx
-    delrovymax = delrovymax / ref_rovy
+    del_ro_avg = del_ro_avg / ncells / reference_ro
+    del_ro_vel_x_avg = del_ro_vel_x_avg / ncells / ref_ro_vel_x
+    del_ro_vel_y_avg = del_ro_vel_y_avg / ncells / ref_ro_vel_y
+    del_ro_energy_avg = del_ro_energy_avg / ncells /  ref_ro_energy
+    del_ro_vel_x_max = del_ro_vel_x_max / ref_ro_vel_x
+    del_ro_vel_y_max = del_ro_vel_y_max / ref_ro_vel_y
 
-    emax = amax1(delrovymax, delrovymax)
-    eavg = amax1(delrovxavg, delrovyavg)
+    emax = np.max([del_ro_vel_x_max, del_ro_vel_y_max])
+    eavg = np.average([del_ro_vel_x_avg, del_ro_vel_y_avg])
 
-    # store the maximum change in rovx and emax to be printed out
-    # save the current values of the primary variables as prop_old values
-    # for use in the next convergence check
-    for i in range(0, ni - 1):
-        for j in range(0, nj - 1):
-            ro_old[i,j] = ro[i,j]
-            rovx_old[i,j] = rovx[i,j]
-            rovy_old[i,j] = rovy[i,j]
-            roe_old[i,j] = roe[i,j]
+    # Store the current values as the old ones
+    for j in range(0, nv):
+        for i in range(0, nu):
+            old_ro[j,i,0] = ro[j,i,0]
+            old_ro_vel_x[j,i,0] = old_ro_vel_x[j,i,0]
+            old_ro_vel_y[j,i,0] = old_ro_vel_y[j,i,0]
+            old_ro_energy[j,i,0] = old_ro_energy[j,i,0]
 
-    # Write the average changes in the primary variables to unit 3
-    # for use in the convergence plotting program
-    write_to_file(delroavg, delrovxavg, delrovyavg, delroeavg)
+    # Pack these values!
+    old_primary_variables[0] = old_ro
+    old_primary_variables[1] = old_ro_vel_x
+    old_primary_variables[2] = old_ro_vel_y
+    old_primary_variables[3] = old_ro_energy
 
-    # write a short output summary which will be written on screen
-    flow_ratio = flow[ni - 1] / flow[0]
+    # On-screen output
     print("------ Time Step Number ----- %i" %nstep)
     print("Emax = %d , at imax = %d , at jmax = %d , eavg = %d " %(emax, imax, jmax, eavg) )
-    print("Inlet flow = %d , outlet to inlet flow ratio = %d ", %(flow[0], flow_ratio))
+
+    return old_primary_variables

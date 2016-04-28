@@ -41,6 +41,10 @@ def set_other_variables(primary_variables, secondary_variables, boundary_conditi
     alpha_1 = boundary_conditions[4]
     pressure_static_exit = boundary_conditions[5]
 
+    # Additional flow properties
+    cp = rgas * gamma / (gamma - 1.0)
+    cv = cp / (gamma * 1.0)
+
     # Compute the new secondary values!
     for j in range(0, nv):
         for i in range(0, nu):
@@ -113,12 +117,12 @@ def apply_boundary_conditions(nstep, primary_variables, secondary_variables, bou
     cv = cp / (gamma * 1.0)
 
     for j in range(0, nv):
-        if(nsteps == 1):
+        if(nstep == 1):
             ro_inlet[j,0] = ro[j,0,0]
         else:
             ro_inlet[j,0] = density_fac * ro[j,0,0] + density_fac_one * ro_inlet[j,0]
 
-        if(ro_inlet[j,0] > 0.9999 * ro_stag_inlet)
+        if(ro_inlet[j,0] > 0.9999 * ro_stag_inlet):
             ro_inlet[j,0] = 0.9999 * ro_stag_inlet
 
         pressure[j,0,0] = pressure_stag_inlet * (ro_inlet[j,0] / ro_stag_inlet) ** gamma

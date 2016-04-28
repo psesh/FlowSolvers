@@ -23,10 +23,10 @@ def set_timestep(primary_variables, secondary_variables, boundary_conditions, gr
     nv, nu, nw = point_x.shape
 
     # Velocity magnitude
-    velocity_magnitude = np.zeros((nu, nv))
+    velocity_magnitude = np.zeros((nv, nu))
 
     # Time step parameter
-    step = np.zeros((nu, nv))
+    step = np.zeros((nv, nu))
 
     # Setting the velocity magnitude!
     for j in range(0, nv):
@@ -53,12 +53,12 @@ def set_timestep(primary_variables, secondary_variables, boundary_conditions, gr
     for i in range(0, nu - 1):
         aaverage = np.sqrt(gamma * pressure[nv - 1 , i] / ro[nv - 1 , i])
         velaverage = velocity_magnitude[nv - 1, i]
-        step[j, nv - 1] = cfl * dmin[nv - 1, j] / (aaverage + velaverage)
+        step[nv - 1, i] = cfl * dmin[nv - 1, j] / (aaverage + velaverage)
 
     for j in range(0, nv - 1):
         aaverage = np.sqrt(gamma * pressure[j, nu - 1] / ro[j, nu - 1])
         velaverage = velocity_magnitude[j, nu - 1]
-        step[nu - 1, j] = cfl * dmin[j, nu - 1] / (aaverage + velaverage)
+        step[j, nu - 1] = cfl * dmin[j, nu - 1] / (aaverage + velaverage)
 
     aaverage = np.sqrt(gamma * pressure[nv - 1, nu - 1] / ro[nv - 1, nu - 1])
     step[nv - 1, nu - 1] = cfl * dmin[nv - 1, nu - 1]/ (velocity_magnitude[nv - 1, nu - 1] + aaverage)

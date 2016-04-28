@@ -167,5 +167,3 @@ def initial_setup(nu, nv, nw):
 
 
     return primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters
-
-initial_setup()
