@@ -42,6 +42,9 @@ def main():
     reference_values[2] = 10 # ro * vel-y
     reference_values[3] = 100 # ro * energy
 
+    # Starting values
+    starting_variables = {}
+
     primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup(nu, nv, nw)
     areas = grid_parameters[7] # Will need this for later!
 
@@ -79,7 +82,11 @@ def main():
     for step_number in range(1, nsteps):
 
         # Define some starting values
-        starting_variables = set_starting_values(primary_variables)
+        starting_variables_temp = set_starting_values(primary_variables)
+        starting_variables[0] = starting_variables_temp[0]
+        starting_variables[1] = starting_variables_temp[1]
+        starting_variables[2] = starting_variables_temp[2]
+        starting_variables[3] = starting_variables_temp[3]
 
         for nrkut in range(1, 5):
 
@@ -125,12 +132,7 @@ def main():
             ro_vel_y, del_ro_vel_y = flux.sum_fluxes(flux_i_ymom, flux_j_ymom, ro_vel_y, start_ro_vel_y, del_ro_vel_y, frkut, step, areas)
             ro_energy, del_ro_energy = flux.sum_fluxes(flux_i_enthalpy, flux_j_enthalpy, ro_energy, start_ro_energy, del_ro_energy, frkut, step, areas)
 
-            # Smoothing!
-            #ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
-            #ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
-            #ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
-            #ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
-
+            # Primary variables!
             primary_variables[0] = ro
             primary_variables[1] = ro_vel_x
             primary_variables[2] = ro_vel_y
@@ -140,12 +142,17 @@ def main():
             secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
 
+            #print ro, start_ro
         # Write out convergence parameters at every niter iterations
+        # Smoothing!
+        #ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
+        #ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
+        #ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
+        #ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
+
         if(np.mod(step_number, niter) == 0):
 
             check_convergence(grid_parameters, primary_variables, starting_variables, reference_values, step_number, ncells)
             plot_to_grid(grid_parameters, primary_variables, secondary_variables, step_number)
-            starting_variables = primary_variables
-
             step = set_timestep(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 main()
