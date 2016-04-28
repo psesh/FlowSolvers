@@ -44,8 +44,7 @@ def main():
 
     primary_variables, secondary_variables, fluxes, boundary_conditions, grid_parameters = initial_setup(nu, nv, nw)
     areas = grid_parameters[7] # Will need this for later!
-    print 'areas'
-    #print areas
+
     # Set the time-step
     step = set_timestep(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
@@ -132,15 +131,13 @@ def main():
             #ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
             #ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
 
-            # Recompute the secondary variables
-            secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
-
-            # Pack everything up!
             primary_variables[0] = ro
             primary_variables[1] = ro_vel_x
             primary_variables[2] = ro_vel_y
             primary_variables[3] = ro_energy
 
+            # Recompute the secondary variables
+            secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
 
         # Write out convergence parameters at every niter iterations

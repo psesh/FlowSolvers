@@ -88,12 +88,13 @@ def check_convergence(grid_parameters, primary_variables, old_primary_variables,
 
 
     # Compute the average changes
-    del_ro_avg = del_ro_avg / ncells / ref_ro
-    del_ro_vel_x_avg = del_ro_vel_x_avg / ncells / ref_ro_vel_x
-    del_ro_vel_y_avg = del_ro_vel_y_avg / ncells / ref_ro_vel_y
-    del_ro_energy_avg = del_ro_energy_avg / ncells /  ref_ro_energy
-    del_ro_vel_x_max = del_ro_vel_x_max /(1.0 * ref_ro_vel_x)
-    del_ro_vel_y_max = del_ro_vel_y_max /(1.0 * ref_ro_vel_y)
+    del_ro_avg = (1.0 * del_ro_avg )/ ( ncells * ref_ro)
+    del_ro_vel_x_avg = (1.0 * del_ro_vel_x_avg ) / ( ncells * ref_ro_vel_x )
+    del_ro_vel_y_avg = (1.0 * del_ro_vel_y_avg) / ( ncells * ref_ro_vel_y )
+    del_ro_energy_avg = (1.0 * del_ro_energy_avg ) / ( ncells *  ref_ro_energy )
+    del_ro_vel_x_max = (1.0 * del_ro_vel_x_max) /(1.0 * ref_ro_vel_x)
+    del_ro_vel_y_max = (1.0 * del_ro_vel_y_max) /(1.0 * ref_ro_vel_y)
+
 
     emax = np.max([del_ro_vel_x_max, del_ro_vel_y_max])
     eavg = np.average([del_ro_vel_x_avg, del_ro_vel_y_avg])
