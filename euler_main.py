@@ -141,15 +141,17 @@ def main():
             # Recompute the secondary variables
             secondary_variables = set_other_variables(primary_variables, secondary_variables, boundary_conditions, grid_parameters)
 
-
             #print ro, start_ro
         # Write out convergence parameters at every niter iterations
         # Smoothing!
-        #ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
-        #ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
-        #ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
-        #ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
-
+        #plot_to_grid(grid_parameters, primary_variables, secondary_variables, 500)
+        #print 'Smoothing routine'
+        #ro, corrected_ro = smooth(ro, corrected_ro, boundary_conditions, grid_parameters)
+        #ro_vel_x, corrected_ro_vel_x = smooth(ro_vel_x, corrected_ro_vel_x, boundary_conditions, grid_parameters)
+        #ro_vel_y, corrected_ro_vel_y = smooth(ro_vel_y, corrected_ro_vel_y, boundary_conditions, grid_parameters)
+        #ro_energy, corrected_ro_energy = smooth(ro_energy, corrected_ro_energy, boundary_conditions, grid_parameters)
+        #print 'Smoothing routine done.'
+        #plot_to_grid(grid_parameters, primary_variables, secondary_variables, 600)
         if(np.mod(step_number, niter) == 0):
 
             check_convergence(grid_parameters, primary_variables, starting_variables, reference_values, step_number, ncells)

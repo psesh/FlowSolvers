@@ -64,7 +64,7 @@ def set_fluxes(primary_variables, secondary_variables, fluxes, boundary_conditio
             flow[i,0] = flow[i,0] + flux_i_mass[j,i]
 
     # Mass flux across each "j" face of elements
-    for j in range(1, nv):
+    for j in range(1, nv-1):
         for i in range(0, nu - 1):
             flux_j_mass[j,i] = 0.5 * ( (ro_vel_x[j,i,0] + ro_vel_x[j,i+1,0]) * dljx[j,i]  +  (ro_vel_y[j,i] + ro_vel_y[j,i+1]) * dljy[j,i] )
 
@@ -136,6 +136,7 @@ def sum_fluxes(iflux, jflux, prop, prop_start, delprop, frkut, step, areas):
     # Allocate "local" memory
     nv, nu, nw = prop.shape
     store = np.zeros((nv, nu))
+    prop_replacement = np.zeros((nv, nu, nw))
 
     # Set store to be total flux in prop
     for j in range(0, nv - 1):
@@ -143,17 +144,13 @@ def sum_fluxes(iflux, jflux, prop, prop_start, delprop, frkut, step, areas):
             totalflux = iflux[j,i] - iflux[j,i+1] + jflux[j,i] - jflux[j+1,i]
             store[j,i] = frkut * step[j,i] * totalflux /(1.0 * areas[j,i])
 
-
     # Distribute the change equally to the four interior corners of each cell.
     # Each interior grid points receieve 1/4 of the change from the four
     # cells adjacent to it.
-    print '----below-----'
     for j in range(1, nv - 1):
         for i in range(1, nu - 1):
-            add = 0.25 * (store[j,i] + store[j-1,i-1] + store[j-1,i] + store[j,i-1])
-            prop[j,i,0] = prop_start[j,i,0] + (frkut * add * 1.0)
-            print frkut * add * 1.0, prop_start[j,i,0], prop[j,i,0]
-            print '~~~~~~'
+            prop_replacement[j,i,0] =  prop_start[j,i,0] + (0.25 * (store[j,i] + store[j-1,i-1] + store[j-1,i] + store[j,i-1]))
+
 
     #print prop, prop_start
     #print np.linalg.norm(prop - prop_start)
@@ -163,38 +160,38 @@ def sum_fluxes(iflux, jflux, prop, prop_start, delprop, frkut, step, areas):
 
         # add to nodes with j = 0
         add = 0.5 * ( store[0,i] + store[0,i-1] )
-        prop[0,i,0] = prop_start[0,i,0] + frkut*add
+        prop_replacement[0,i,0] = prop_start[0,i,0] + add
 
         # add to nodes with j = nv
         add = 0.5 * (store[nv-1,i] + store[nv-1,i-1])
-        prop[nv-1,i,0] = prop_start[nv-1,i,0] + frkut * add
+        prop_replacement[nv-1,i,0] = prop_start[nv-1,i,0] + add
 
     # Now add on the extra changes to the inlet and outlet
     for j in range(1, nv - 1):
 
         # add to nodes with i = nu
         add = 0.5 * (store[j, nu - 1] + store[j-1, nu - 1] )
-        prop[j, nu - 1, 0] = prop_start[j, nu - 1, 0 ] + (frkut*add)
+        prop_replacement[j, nu - 1, 0] = prop_start[j, nu - 1, 0 ] + add
 
         # add to ntoes with i = 0
         add = 0.5 * (store[j, 0] + store[j-1, 0])
-        prop[j, 0, 0] = prop_start[j, 0, 0] + (frkut * add)
+        prop_replacement[j, 0, 0] = prop_start[j, 0, 0] + add
 
     # For the node with i = 0, j = 0
     add = store[0,0]
-    prop[0,0,0] = prop_start[0,0,0] + (frkut * add)
+    prop_replacement[0,0,0] = prop_start[0,0,0] +  add
 
     # For the node with i = 0, j = nv - 1
     add = store[nv-1,0]
-    prop[nv-1,0,0] = prop_start[nv-1,0,0] + (frkut * add)
+    prop_replacement[nv-1,0,0] = prop_start[nv-1,0,0] +  add
 
     # For the node with i = nu - 1, j = 0
     add = store[0, nu - 1]
-    prop[0, nu - 1, 0] = prop_start[0, nu - 1, 0] + frkut * add
+    prop_replacement[0, nu - 1, 0] = prop_start[0, nu - 1, 0] +  add
 
     # For the node with i = nu -1, j = nv - 1
     add = store[nv-1, nu-1]
-    prop[nv-1,nu-1,0] = prop_start[nv-1,nu-1,0] + frkut * add
+    prop_replacement[nv-1,nu-1,0] = prop_start[nv-1,nu-1,0] +  add
 
     # Now save the changes in the primary variable as delprop
     for j in range(0, nv-1):
@@ -202,4 +199,4 @@ def sum_fluxes(iflux, jflux, prop, prop_start, delprop, frkut, step, areas):
             delprop[j,i] = store[j,i]
 
     #print np.linalg.norm(prop - prop_start) * 100000.00
-    return prop, delprop
+    return prop_replacement, delprop

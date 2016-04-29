@@ -95,8 +95,6 @@ def check_convergence(grid_parameters, primary_variables, old_primary_variables,
     del_ro_vel_x_max = (1.0 * del_ro_vel_x_max) /(1.0 * ref_ro_vel_x)
     del_ro_vel_y_max = (1.0 * del_ro_vel_y_max) /(1.0 * ref_ro_vel_y)
 
-    print delta
-
     emax = np.max([del_ro_vel_x_max, del_ro_vel_y_max])
     eavg = np.average([del_ro_vel_x_avg, del_ro_vel_y_avg])
 

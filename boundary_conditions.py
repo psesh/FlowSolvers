@@ -86,16 +86,26 @@ def apply_boundary_conditions(nstep, primary_variables, secondary_variables, bou
     nv, nu, nw = point_x.shape
 
     # "Unpack" the primary flow variables
-    ro = primary_variables[0]
-    ro_vel_x = primary_variables[1]
-    ro_vel_y = primary_variables[2]
-    ro_energy = primary_variables[3]
+    ro_start = primary_variables[0]
+    ro_vel_x_start = primary_variables[1]
+    ro_vel_y_start = primary_variables[2]
+    ro_energy_start = primary_variables[3]
 
     # "Unpack" the secondary flow variables
-    vel_x = secondary_variables[0]
-    vel_y = secondary_variables[1]
-    pressure = secondary_variables[2]
-    enthalpy_stag = secondary_variables[3]
+    vel_x_start = secondary_variables[0]
+    vel_y_start = secondary_variables[1]
+    pressure_start = secondary_variables[2]
+    enthalpy_stag_start = secondary_variables[3]
+
+    # Declare variables:
+    ro = np.zeros((nv, nu, nw))
+    ro_vel_x = np.zeros((nv, nu, nw))
+    ro_vel_y = np.zeros((nv, nu, nw))
+    ro_energy = np.zeros((nv, nu, nw))
+    vel_x = np.zeros((nv, nu, nw))
+    vel_y = np.zeros((nv, nu, nw))
+    pressure = np.zeros((nv, nu, nw))
+    enthalpy_stag = np.zeros((nv, nu, nw))
 
     # "Unpack" the boundary conditions
     rgas = boundary_conditions[0]
@@ -118,33 +128,56 @@ def apply_boundary_conditions(nstep, primary_variables, secondary_variables, bou
 
     for j in range(0, nv):
         if(nstep == 1):
-            ro_inlet[j,0] = ro[j,0,0]
+            ro_inlet[j,0] = ro_start[j,0,0]
         else:
-            ro_inlet[j,0] = density_fac * ro[j,0,0] + density_fac_one * ro_inlet[j,0]
+            ro_inlet[j,0] = density_fac * ro_start[j,0,0] + density_fac_one * ro_inlet[j,0]
 
         if(ro_inlet[j,0] > 0.9999 * ro_stag_inlet):
             ro_inlet[j,0] = 0.9999 * ro_stag_inlet
+        elif(ro_inlet[j,0] < 0.0): # bug!!!!!!!!!!
+            ro_inlet[j,0] = 0.9999 * ro_stag_inlet
 
-        pressure[j,0,0] = pressure_stag_inlet * (ro_inlet[j,0] / ro_stag_inlet) ** gamma
+        ro_start[j,0,0] = ro_inlet[j,0]
+        pressure_start[j,0,0] = pressure_stag_inlet * (ro_inlet[j,0] / ro_stag_inlet) ** gamma
         temperature = pressure[j,0,0] / (rgas * ro_inlet[j,0])
         velocity = np.sqrt(2.0 * cp * (temp_stag_inlet - temperature))
-        vel_x[j,0,0] = velocity * np.cos(alpha_1)
-        vel_y[j,0,0] = velocity * np.sin(alpha_1)
-        ro_vel_x[j,0,0] = ro_inlet[j,0] * vel_x[j,0,0]
-        ro_vel_y[j,0,0] = ro_inlet[j,0] * vel_y[j,0,0]
-        ro_energy[j,0,0] = ro_inlet[j,0] * (cv * temperature + 0.5 * (velocity ** 2) )
-        enthalpy_stag[j,0,0] = cp * temp_stag_inlet
-        pressure[j, nu - 1, 0] = pressure_static_exit
+        vel_x_start[j,0,0] = velocity * np.cos(alpha_1)
+        vel_y_start[j,0,0] = velocity * np.sin(alpha_1)
+        ro_vel_x_start[j,0,0] = ro_inlet[j,0] * vel_x[j,0,0]
+        ro_vel_y_start[j,0,0] = ro_inlet[j,0] * vel_y[j,0,0]
+        ro_energy_start[j,0,0] = ro_inlet[j,0] * (cv * temperature + 0.5 * (velocity ** 2) )
+        enthalpy_stag_start[j,0,0] = cp * temp_stag_inlet
+        pressure_start[j, nu - 1, 0] = pressure_static_exit
+
+        for i in range(0, nu):
+            ro[j,i,0] = ro_start[j,i,0]
+            ro_vel_x[j,i,0] = ro_vel_x_start[j,i,0]
+            ro_vel_y[j,i,0] = ro_vel_y_start[j,i,0]
+            ro_energy[j,i,0] = ro_energy_start[j,i,0]
+            enthalpy_stag[j,i,0] = enthalpy_stag_start[j,i,0]
+            vel_x[j,i,0] = vel_x_start[j,i,0]
+            vel_y[j,i,0] = vel_y_start[j,i,0]
+            pressure[j,i,0] = pressure_start[j,i,0]
+
+    # Insepect the difference!
+
+    plot_to_grid(grid_parameters, primary_variables, secondary_variables, 0)
 
 
+    print'---NORM----'
+    print g
     # Now that we are done, return the primary and secondary flow variables!
-    primary_variables[0] = ro
-    primary_variables[1] = ro_vel_x
-    primary_variables[2] = ro_vel_y
-    primary_variables[3] = ro_energy
-    secondary_variables[0] = vel_x
-    secondary_variables[1] = vel_y
-    secondary_variables[2] = pressure
-    secondary_variables[3] = enthalpy_stag
+    primary_variables2 = {}
+    secondary_variables2 = {}
+    primary_variables2[0] = ro
+    primary_variables2[1] = ro_vel_x
+    primary_variables2[2] = ro_vel_y
+    primary_variables2[3] = ro_energy
+    secondary_variables2[0] = vel_x
+    secondary_variables2[1] = vel_y
+    secondary_variables2[2] = pressure
+    secondary_variables2[3] = enthalpy_stag
 
-    return primary_variables, secondary_variables
+    plot_to_grid(grid_parameters, primary_variables2, secondary_variables2, 1)
+    time.sleep(3600)
+    return primary_variables2, secondary_variables2

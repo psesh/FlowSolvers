@@ -29,12 +29,11 @@ def smooth(flow_property, corrected_flow_property, boundary_conditions, grid_par
     imi = 0
 
     for i in range(0, nu):
-        ip1 = i + 1
+        ip1 = i
         if i == nu - 1 :
             ip1 = nu - 1
         if i == 1 :
-            im1 = 1
-
+            im1 = 0
         for j in range(2, nv - 1):
             average = 0.25 * ( flow_property[j, ipi, 0] + flow_property[j, imi, 0] + flow_property[j-1, i, 0] + flow_property[j + 1, i, 0] )
             corrected_new = fcorrection  * (  flow_property[j,i,0] - average)
@@ -63,4 +62,4 @@ def smooth(flow_property, corrected_flow_property, boundary_conditions, grid_par
 
 
     # Return!
-    return flow_property
+    return flow_property, corrected_flow_property

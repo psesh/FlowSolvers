@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from evtk.hl import gridToVTK
-
+import numpy as np
 
 def plot_to_grid(grid_parameters, primary_variables, secondary_variables, number):
 
@@ -22,5 +22,12 @@ def plot_to_grid(grid_parameters, primary_variables, secondary_variables, number
     vel_y = secondary_variables[1]
     pressure = secondary_variables[2]
     enthalpy_stag = secondary_variables[3]
+
+    # mach number
+    velocity_magnitude = np.zeros((nv, nu, nw))
+    for j in range(0, nv):
+        for i in range(0, nu):
+            velocity_magnitude[j,i,0] = np.sqrt( vel_x[j,i,0] * vel_x[j,i,0] + vel_y[j,i,0] * vel_y[j,i,0] )
+
     filename = "./output"+str(number)
-    gridToVTK(filename, point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro, "velx": vel_x, "vely": vel_y })
+    gridToVTK(filename, point_x, point_y, point_z, pointData={"pressure": pressure, "density": ro, "vel-x": vel_x, "vel-y": vel_y , "vel-mag": velocity_magnitude})
